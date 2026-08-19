@@ -5,4 +5,4 @@ export const USER_ROLES = {
   KITCHEN: "KITCHEN",
 };
 
-export const USER_ROLES_VALUES = Object.values(USER_ROLES);
+export const USER_ROLES_VALUES = Object.freeze(Object.values(USER_ROLES));

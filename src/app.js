@@ -1,4 +1,7 @@
 import express from "express";
+import { AppError } from "./errors/appError.js";
+import handleErrorMiddleware from "./middlewares/handleError.middleware.js";
+import branchRoutes from "./routes/branches.routes.js";
 
 export const app = express();
 
@@ -10,3 +13,11 @@ app.get("/health", (request, response) => {
     message: "API is running.",
   });
 });
+
+app.use("/branches", branchRoutes);
+
+app.use((request, response, next) => {
+  return next(new AppError("Rota não encontrada.", 404));
+});
+
+app.use(handleErrorMiddleware);
