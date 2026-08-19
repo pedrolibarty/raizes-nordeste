@@ -1,5 +1,5 @@
 import { EntitySchema } from "typeorm";
-import { USER_ROLE_VALUES } from "../constants/user-roles.js";
+import { USER_ROLES_VALUES } from "../constants/user.roles.js";
 
 export const User = new EntitySchema({
   name: "User",
@@ -80,7 +80,7 @@ export const User = new EntitySchema({
   checks: [
     {
       name: "chk_users_role",
-      expression: `"role" IN (${USER_ROLE_VALUES.map(
+      expression: `"role" IN (${USER_ROLES_VALUES.map(
         (role) => `'${role}'`,
       ).join(", ")})`,
     },
