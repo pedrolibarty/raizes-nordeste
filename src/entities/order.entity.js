@@ -1,4 +1,5 @@
 import { EntitySchema } from "typeorm";
+import { ORDER_STATUS_VALUES } from "../constants/order-statuses.js";
 
 export const Order = new EntitySchema({
   name: "Order",
@@ -132,18 +133,32 @@ export const Order = new EntitySchema({
         'WEB'
       )`,
     },
+
+    {
+      name: "chk_orders_status",
+      expression: `"status" IN (${ORDER_STATUS_VALUES.map(
+        (status) => `'${status}'`
+      ).join(", ")})`,
+    },
+
     {
       name: "chk_orders_original_amount",
       expression: `"val_amount_og" >= 0`,
     },
+
     {
       name: "chk_orders_discount",
-      expression: `"val_discount" >= 0 AND "val_discount" <= "val_amount_og"`,
+      expression: `
+        "val_discount" >= 0
+        AND "val_discount" <= "val_amount_og"
+      `,
     },
+
     {
       name: "chk_orders_final_amount",
       expression: `"val_amount" >= 0`,
     },
+
     {
       name: "chk_orders_points",
       expression: `"points" >= 0`,
