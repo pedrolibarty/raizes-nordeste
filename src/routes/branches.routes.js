@@ -17,10 +17,9 @@ import verifyUserRoleMiddleware from "../middlewares/verifyUserRole.middleware.j
 
 const branchRoutes = Router();
 
-branchRoutes.use(isLoggedInMiddleware);
-
 branchRoutes.post(
   "/",
+  isLoggedInMiddleware,
   verifyUserRoleMiddleware(USER_ROLES.ADMIN),
   validateCreateBranchesMiddleware,
   createBranchesController,
@@ -30,6 +29,7 @@ branchRoutes.get("/:id", validateBranchIdMiddleware, retrieveBranchesController)
 branchRoutes.patch(
   "/:id",
   validateBranchIdMiddleware,
+  isLoggedInMiddleware,
   verifyUserRoleMiddleware(USER_ROLES.ADMIN, USER_ROLES.MANAGER),
   validateUpdateBranchesMiddleware,
   updateBranchesController,
@@ -37,6 +37,7 @@ branchRoutes.patch(
 branchRoutes.delete(
   "/:id",
   validateBranchIdMiddleware,
+  isLoggedInMiddleware,
   verifyUserRoleMiddleware(USER_ROLES.ADMIN),
   deleteBranchesController,
 );
