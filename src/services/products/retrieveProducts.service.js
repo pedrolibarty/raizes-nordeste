@@ -12,7 +12,15 @@ const retrieveProductsService = async (productId) => {
     throw new AppError("Produto não encontrado.", 404);
   }
 
-  return foundProduct;
+  const inventoryRepository = AppDataSource.getRepository("Inventory");
+  const foundInventory = await inventoryRepository.findOne({
+    where: { product: { id: productId } },
+  });
+
+  return {
+    ...foundProduct,
+    stockQuantity: foundInventory?.quantity ?? 0,
+  };
 };
 
 export default retrieveProductsService;

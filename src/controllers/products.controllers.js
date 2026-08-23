@@ -1,6 +1,7 @@
 import createProductsService from "../services/products/createProducts.service.js";
 import deleteProductsService from "../services/products/deleteProducts.service.js";
 import listProductsService from "../services/products/listProducts.service.js";
+import listProductsByBranchService from "../services/products/listProductsByBranch.service.js";
 import retrieveProductsService from "../services/products/retrieveProducts.service.js";
 import updateProductsService from "../services/products/updateProducts.service.js";
 
@@ -13,6 +14,13 @@ export const createProductsController = async (req, res) => {
 
 export const listProductsController = async (req, res) => {
   const products = await listProductsService();
+
+  return res.status(200).json({ data: products });
+};
+
+export const listProductsByBranchController = async (req, res) => {
+  const branchId = req.params.branchId;
+  const products = await listProductsByBranchService(branchId);
 
   return res.status(200).json({ data: products });
 };

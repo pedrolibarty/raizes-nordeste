@@ -113,6 +113,14 @@ export const validateProductIdMiddleware = (req, res, next) => {
   return next();
 };
 
+export const validateProductBranchIdMiddleware = (req, res, next) => {
+  if (!UUID_PATTERN.test(req.params.branchId)) {
+    throw new AppError("O identificador da filial deve ser um UUID válido.", 400);
+  }
+
+  return next();
+};
+
 export const validateCreateProductsMiddleware = (req, res, next) => {
   validateProductBody(req.body, false);
   return next();

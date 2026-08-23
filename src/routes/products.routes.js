@@ -3,6 +3,7 @@ import { USER_ROLES } from "../constants/user-roles.js";
 import {
   createProductsController,
   deleteProductsController,
+  listProductsByBranchController,
   listProductsController,
   retrieveProductsController,
   updateProductsController,
@@ -10,6 +11,7 @@ import {
 import isLoggedInMiddleware from "../middlewares/isLoggedIn.middleware.js";
 import {
   validateCreateProductsMiddleware,
+  validateProductBranchIdMiddleware,
   validateProductIdMiddleware,
   validateUpdateProductsMiddleware,
 } from "../middlewares/validateProducts.middleware.js";
@@ -25,6 +27,11 @@ productRoutes.post(
   createProductsController,
 );
 productRoutes.get("/", listProductsController);
+productRoutes.get(
+  "/branch/:branchId",
+  validateProductBranchIdMiddleware,
+  listProductsByBranchController,
+);
 productRoutes.get(
   "/:id",
   validateProductIdMiddleware,

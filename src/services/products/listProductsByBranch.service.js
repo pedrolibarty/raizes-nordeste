@@ -1,9 +1,18 @@
 import { In } from "typeorm";
 import { AppDataSource } from "../../data-source.js";
+import { AppError } from "../../errors/appError.js";
 
-const listProductsService = async () => {
+const listProductsByBranchService = async (branchId) => {
+  const branchRepository = AppDataSource.getRepository("Branch");
   const productRepository = AppDataSource.getRepository("Product");
+  const foundBranch = await branchRepository.findOneBy({ id: branchId });
+
+  if (!foundBranch) {
+    throw new AppError("Filial não encontrada.", 404);
+  }
+
   const products = await productRepository.find({
+    where: { branch: { id: branchId } },
     relations: { branch: true },
     order: { name: "ASC" },
   });
@@ -28,4 +37,4 @@ const listProductsService = async () => {
   }));
 };
 
-export default listProductsService;
+export default listProductsByBranchService;
