@@ -2,6 +2,7 @@ import express from "express";
 import { AppError } from "./errors/appError.js";
 import handleErrorMiddleware from "./middlewares/handleError.middleware.js";
 import branchRoutes from "./routes/branches.routes.js";
+import inventoryRoutes from "./routes/inventory.routes.js";
 import productRoutes from "./routes/products.routes.js";
 import userRoutes from "./routes/users.routes.js";
 
@@ -17,6 +18,7 @@ app.get("/health", (request, response) => {
 });
 
 app.use("/branches", branchRoutes);
+app.use("/inventory", inventoryRoutes);
 app.use("/products", productRoutes);
 app.use("/users", userRoutes);
 
