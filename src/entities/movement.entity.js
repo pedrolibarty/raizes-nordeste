@@ -24,6 +24,12 @@ export const Movement = new EntitySchema({
       nullable: false,
     },
 
+    notes: {
+      type: "varchar",
+      length: 255,
+      nullable: false,
+    },
+
     createdAt: {
       name: "created_at",
       type: "timestamp",
@@ -65,7 +71,7 @@ export const Movement = new EntitySchema({
     {
       name: "chk_movements_type",
       expression: `"movement_type" IN (${MOVEMENT_TYPE_VALUES.map(
-        (type) => `'${type}'`
+        (type) => `'${type}'`,
       ).join(", ")})`,
     },
     {
