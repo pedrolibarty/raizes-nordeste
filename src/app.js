@@ -2,6 +2,7 @@ import express from "express";
 import { AppError } from "./errors/appError.js";
 import handleErrorMiddleware from "./middlewares/handleError.middleware.js";
 import branchRoutes from "./routes/branches.routes.js";
+import productRoutes from "./routes/products.routes.js";
 import userRoutes from "./routes/users.routes.js";
 
 export const app = express();
@@ -16,6 +17,7 @@ app.get("/health", (request, response) => {
 });
 
 app.use("/branches", branchRoutes);
+app.use("/products", productRoutes);
 app.use("/users", userRoutes);
 
 app.use((request, response, next) => {
