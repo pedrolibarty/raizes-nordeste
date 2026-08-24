@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { AppDataSource } from "../../data-source.js";
+import { AUTH_ACTOR_TYPES } from "../../constants/auth-actor-types.js";
 import { AppError } from "../../errors/appError.js";
 
 const loginUsersService = async (email, password) => {
@@ -30,7 +31,10 @@ const loginUsersService = async (email, password) => {
   }
 
   const token = jwt.sign(
-    { role: foundUser.role },
+    {
+      actorType: AUTH_ACTOR_TYPES.USER,
+      role: foundUser.role,
+    },
     process.env.JWT_SECRET,
     {
       subject: foundUser.id,
