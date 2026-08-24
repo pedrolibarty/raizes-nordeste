@@ -8,6 +8,7 @@ import loyaltyAccountRoutes from "./routes/loyaltyAccounts.routes.js";
 import loyaltyTransactionRoutes from "./routes/loyaltyTransactions.routes.js";
 import movementRoutes from "./routes/movements.routes.js";
 import productRoutes from "./routes/products.routes.js";
+import promotionRoutes from "./routes/promotions.routes.js";
 import userRoutes from "./routes/users.routes.js";
 
 export const app = express();
@@ -28,6 +29,7 @@ app.use("/loyalty-accounts", loyaltyAccountRoutes);
 app.use("/loyalty-transactions", loyaltyTransactionRoutes);
 app.use("/movements", movementRoutes);
 app.use("/products", productRoutes);
+app.use("/promotions", promotionRoutes);
 app.use("/users", userRoutes);
 
 app.use((request, response, next) => {

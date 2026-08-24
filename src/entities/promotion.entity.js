@@ -94,4 +94,13 @@ export const Promotion = new EntitySchema({
       expression: `"extra_points" >= 0`,
     },
   ],
+
+  indices: [
+    {
+      name: "uq_promotions_active_product",
+      columns: ["product"],
+      unique: true,
+      where: '"is_active" = TRUE',
+    },
+  ],
 });

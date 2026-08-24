@@ -31,6 +31,12 @@ const handleErrorMiddleware = (error, req, res, next) => {
     });
   }
 
+  if (error.constraint === "uq_promotions_active_product") {
+    return res.status(409).json({
+      message: "Este produto já possui uma promoção ativa.",
+    });
+  }
+
   const databaseError = DATABASE_ERRORS[error.code];
 
   if (databaseError) {
