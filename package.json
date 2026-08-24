@@ -9,8 +9,8 @@
     "start": "node src/server.js",
     "test": "jest",
     "typeorm": "typeorm",
-    "migration:run": "typeorm migration:run -- -d src/data-source.js",
-    "migration:revert": "typeorm migration:revert -- -d src/data-source.js"
+    "migration:run": "typeorm migration:run -d src/data-source.js",
+    "migration:revert": "typeorm migration:revert -d src/data-source.js"
   },
   "repository": {
     "type": "git",
