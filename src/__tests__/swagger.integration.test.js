@@ -29,5 +29,15 @@ describe("Swagger", () => {
     for (const schemaName of ["User", "Client", "Order", "Payment"] ) {
       expect(specification.components.schemas[schemaName].properties).not.toHaveProperty("password");
     }
+    const userLoginSchema = specification.components.schemas.UserLoginResponse;
+    const clientLoginSchema = specification.components.schemas.ClientLoginResponse;
+    expect(userLoginSchema.properties.data.properties.token).toBeDefined();
+    expect(userLoginSchema.properties.data.properties.user.$ref).toBe("#/components/schemas/User");
+    expect(userLoginSchema.properties.data.properties).not.toHaveProperty("actorType");
+    expect(clientLoginSchema.properties.data.properties.token).toBeDefined();
+    expect(clientLoginSchema.properties.data.properties.client.$ref).toBe("#/components/schemas/Client");
+    expect(clientLoginSchema.properties.data.properties).not.toHaveProperty("actorType");
+    expect(specification.paths["/users/login"].post.responses[200].content["application/json"].schema.$ref).toBe("#/components/schemas/UserLoginResponse");
+    expect(specification.paths["/clients/login"].post.responses[200].content["application/json"].schema.$ref).toBe("#/components/schemas/ClientLoginResponse");
   });
 });
