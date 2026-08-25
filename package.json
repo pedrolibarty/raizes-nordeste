@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "seed": "node src/seeds/createInitialAdmin.seed.js",
     "typeorm": "typeorm",
     "migration:run": "typeorm migration:run -d src/data-source.js",
     "migration:revert": "typeorm migration:revert -d src/data-source.js"
@@ -38,5 +40,10 @@
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2"
+  },
+  "jest": {
+    "testMatch": [
+      "**/*.test.js"
+    ]
   }
 }

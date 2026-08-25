@@ -29,6 +29,12 @@ const createUsersService = async (data, authenticatedUser) => {
   if (!foundBranch) {
     throw new AppError("A filial informada não foi encontrada.", 404);
   }
+  if (
+    authenticatedUser.role === USER_ROLES.MANAGER &&
+    authenticatedUser.branch.id !== foundBranch.id
+  ) {
+    throw new AppError("Gerentes só podem criar funcionários na própria filial.", 403);
+  }
 
   const passwordHash = await bcrypt.hash(data.password, 10);
   const createdUser = userRepository.create({

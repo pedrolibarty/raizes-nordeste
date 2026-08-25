@@ -11,14 +11,14 @@ export const createMovementsController = async (req, res) => {
 };
 
 export const listMovementsController = async (req, res) => {
-  const movements = await listMovementsService();
+  const movements = await listMovementsService(req.user, req.query);
 
-  return res.status(200).json({ data: movements });
+  return res.status(200).json(movements);
 };
 
 export const retrieveMovementsController = async (req, res) => {
   const movementId = req.params.id;
-  const foundMovement = await retrieveMovementsService(movementId);
+  const foundMovement = await retrieveMovementsService(movementId, req.user);
 
   return res.status(200).json({ data: foundMovement });
 };

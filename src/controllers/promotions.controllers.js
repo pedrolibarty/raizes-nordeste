@@ -28,14 +28,14 @@ export const retrievePromotionsController = async (req, res) => {
 export const updatePromotionsController = async (req, res) => {
   const promotionId = req.params.id;
   const data = req.body;
-  const updatedPromotion = await updatePromotionsService(promotionId, data);
+  const updatedPromotion = await updatePromotionsService(promotionId, data, req.user);
 
   return res.status(200).json({ data: updatedPromotion });
 };
 
 export const deletePromotionsController = async (req, res) => {
   const promotionId = req.params.id;
-  await deletePromotionsService(promotionId);
+  await deletePromotionsService(promotionId, req.user);
 
   return res.status(204).send();
 };

@@ -27,7 +27,7 @@ export const retrieveBranchesController = async (req, res) => {
 export const updateBranchesController = async (req, res) => {
   const branchId = req.params.id;
   const data = req.body;
-  const updatedBranch = await updateBranchesService(branchId, data);
+  const updatedBranch = await updateBranchesService(branchId, data, req.user);
 
   return res.status(200).json({ data: updatedBranch });
 };

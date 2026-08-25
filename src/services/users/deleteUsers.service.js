@@ -4,10 +4,19 @@ import { AppError } from "../../errors/appError.js";
 
 const deleteUsersService = async (userId, authenticatedUser) => {
   const userRepository = AppDataSource.getRepository("User");
-  const foundUser = await userRepository.findOneBy({ id: userId });
+  const foundUser = await userRepository.findOne({
+    where: { id: userId },
+    relations: { branch: true },
+  });
 
   if (!foundUser) {
     throw new AppError("Usuário não encontrado.", 404);
+  }
+  if (
+    authenticatedUser.role === USER_ROLES.MANAGER &&
+    authenticatedUser.branch.id !== foundUser.branch.id
+  ) {
+    throw new AppError("Gerentes só podem excluir funcionários da própria filial.", 403);
   }
 
   if (

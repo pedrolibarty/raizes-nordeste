@@ -1,7 +1,8 @@
 import { AppDataSource } from "../../data-source.js";
 import { AppError } from "../../errors/appError.js";
+import { USER_ROLES } from "../../constants/user-roles.js";
 
-const updateProductsService = async (productId, data) => {
+const updateProductsService = async (productId, data, authenticatedUser) => {
   const productRepository = AppDataSource.getRepository("Product");
   const branchRepository = AppDataSource.getRepository("Branch");
   const foundProduct = await productRepository.findOne({
@@ -12,6 +13,12 @@ const updateProductsService = async (productId, data) => {
   if (!foundProduct) {
     throw new AppError("Produto não encontrado.", 404);
   }
+  if (
+    authenticatedUser.role !== USER_ROLES.ADMIN &&
+    authenticatedUser.branch.id !== foundProduct.branch.id
+  ) {
+    throw new AppError("Gerentes só podem atualizar produtos da própria filial.", 403);
+  }
 
   let productBranch = foundProduct.branch;
 
@@ -20,6 +27,12 @@ const updateProductsService = async (productId, data) => {
 
     if (!productBranch) {
       throw new AppError("A filial informada não foi encontrada.", 404);
+    }
+    if (
+      authenticatedUser.role !== USER_ROLES.ADMIN &&
+      productBranch.id !== authenticatedUser.branch.id
+    ) {
+      throw new AppError("Gerentes não podem mover produtos para outra filial.", 403);
     }
   }
 

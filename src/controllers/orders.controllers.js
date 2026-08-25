@@ -13,8 +13,8 @@ export const createOrdersController = async (req, res) => {
 };
 
 export const listOrdersController = async (req, res) => {
-  const orders = await listOrdersService(req.auth);
-  return res.status(200).json({ data: orders });
+  const orders = await listOrdersService(req.auth, req.query);
+  return res.status(200).json(orders);
 };
 
 export const retrieveOrdersController = async (req, res) => {

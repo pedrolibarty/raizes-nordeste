@@ -1,8 +1,10 @@
 import { AppDataSource } from "../../data-source.js";
+import { In } from "typeorm";
 import { AUTH_ACTOR_TYPES } from "../../constants/auth-actor-types.js";
 import { USER_ROLES } from "../../constants/user-roles.js";
+import parsePaginationService from "../pagination/parsePagination.service.js";
 
-const listOrdersService = async (authentication) => {
+const listOrdersService = async (authentication, query = {}) => {
   const orderRepository = AppDataSource.getRepository("Order");
   const itemRepository = AppDataSource.getRepository("OrderItem");
   let where = {};
@@ -13,21 +15,32 @@ const listOrdersService = async (authentication) => {
     where = { branch: { id: authentication.actor.branch.id } };
   }
 
-  const orders = await orderRepository.find({
+  const { page, limit, skip } = parsePaginationService(query);
+  const [orders, total] = await orderRepository.findAndCount({
     where,
     relations: { branch: true, client: true, user: true },
     order: { createdAt: "DESC" },
+    skip,
+    take: limit,
   });
-
-  return Promise.all(
-    orders.map(async (order) => {
-      const items = await itemRepository.find({
-        where: { order: { id: order.id } },
-        relations: { product: true },
-      });
-      return { ...order, items };
-    }),
-  );
+  const orderIds = orders.map((order) => order.id);
+  const orderItems = orderIds.length
+    ? await itemRepository.find({
+        where: { order: { id: In(orderIds) } },
+        relations: { order: true, product: true },
+      })
+    : [];
+  const itemsByOrderId = orderItems.reduce((groupedItems, orderItem) => {
+    const groupedOrderItems = groupedItems.get(orderItem.order.id) ?? [];
+    groupedOrderItems.push(orderItem);
+    groupedItems.set(orderItem.order.id, groupedOrderItems);
+    return groupedItems;
+  }, new Map());
+  const data = orders.map((order) => ({
+    ...order,
+    items: itemsByOrderId.get(order.id) ?? [],
+  }));
+  return { data, page, limit, total, totalPages: Math.ceil(total / limit) };
 };
 
 export default listOrdersService;

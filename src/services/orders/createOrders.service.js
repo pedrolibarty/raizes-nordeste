@@ -6,6 +6,7 @@ import { AppError } from "../../errors/appError.js";
 import buildOrderItemValuesService from "./helpers/buildOrderItemValues.service.js";
 import recalculateOrderTotalsService from "./helpers/recalculateOrderTotals.service.js";
 import verifyOrderStockAvailabilityService from "./helpers/verifyOrderStockAvailability.service.js";
+import registerAuditLogsService from "../auditLogs/registerAuditLogs.service.js";
 
 const createOrdersService = async (data, authentication) => {
   return AppDataSource.transaction(async (transactionManager) => {
@@ -81,6 +82,18 @@ const createOrdersService = async (data, authentication) => {
       transactionManager,
       savedOrder,
     );
+    await registerAuditLogsService(transactionManager, {
+      authentication,
+      action: "CREATE",
+      entity: "Order",
+      entityId: updatedOrder.id,
+      branchId: foundBranch.id,
+      newData: {
+        status: updatedOrder.status,
+        valAmount: updatedOrder.valAmount,
+        itemCount: savedItems.length,
+      },
+    });
     return { ...updatedOrder, items: savedItems };
   });
 };

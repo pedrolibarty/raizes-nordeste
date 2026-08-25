@@ -3,9 +3,9 @@ import processMockPaymentsService from "../services/payments/processMockPayments
 import retrievePaymentsService from "../services/payments/retrievePayments.service.js";
 
 export const listPaymentsController = async (req, res) => {
-  const payments = await listPaymentsService(req.auth);
+  const payments = await listPaymentsService(req.auth, req.query);
 
-  return res.status(200).json({ data: payments });
+  return res.status(200).json(payments);
 };
 
 export const retrievePaymentsController = async (req, res) => {
@@ -21,6 +21,13 @@ export const processMockPaymentsController = async (req, res) => {
     req.body,
     req.auth,
   );
+
+  if (processedPayment.hasTechnicalError) {
+    return res.status(503).json({
+      message: "O serviço de pagamento apresentou um erro técnico. Tente novamente.",
+      data: processedPayment,
+    });
+  }
 
   return res.status(201).json({ data: processedPayment });
 };

@@ -5,7 +5,6 @@ export const ORDER_STATUSES = Object.freeze({
   READY: "R",
   DELIVERED: "E",
   CANCELLED: "X",
-  PAYMENT_DECLINED: "N",
 });
 
 export const ORDER_STATUS_VALUES = Object.freeze(

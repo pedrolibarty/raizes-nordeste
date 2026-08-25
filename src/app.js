@@ -1,4 +1,7 @@
 import express from "express";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpecification } from "./config/swagger.js";
+import auditLogRoutes from "./routes/auditLogs.routes.js";
 import { AppError } from "./errors/appError.js";
 import handleErrorMiddleware from "./middlewares/handleError.middleware.js";
 import branchRoutes from "./routes/branches.routes.js";
@@ -23,6 +26,9 @@ app.get("/health", (request, response) => {
     message: "API is running.",
   });
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
+app.use("/audit-logs", auditLogRoutes);
 
 app.use("/branches", branchRoutes);
 app.use("/clients", clientRoutes);

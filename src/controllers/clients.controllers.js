@@ -13,9 +13,9 @@ export const createClientsController = async (req, res) => {
 };
 
 export const listClientsController = async (req, res) => {
-  const clients = await listClientsService();
+  const clients = await listClientsService(req.query);
 
-  return res.status(200).json({ data: clients });
+  return res.status(200).json(clients);
 };
 
 export const loginClientsController = async (req, res) => {

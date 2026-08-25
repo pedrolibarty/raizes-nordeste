@@ -8,6 +8,7 @@ import { AppError } from "../../errors/appError.js";
 import createMovementsService from "../movements/createMovements.service.js";
 import retrieveOrderWithItemsService from "./helpers/retrieveOrderWithItems.service.js";
 import verifyOrderAccessService from "./helpers/verifyOrderAccess.service.js";
+import registerAuditLogsService from "../auditLogs/registerAuditLogs.service.js";
 
 const cancelOrdersService = async (orderId, authentication = null) => {
   return AppDataSource.transaction(async (transactionManager) => {
@@ -72,6 +73,7 @@ const cancelOrdersService = async (orderId, authentication = null) => {
     }
 
     const cancelledAt = new Date();
+    const previousStatus = lockedOrder.status;
     lockedOrder.status = ORDER_STATUSES.CANCELLED;
     lockedOrder.cancelledAt = cancelledAt;
     for (const orderItem of orderItems) {
@@ -79,7 +81,17 @@ const cancelOrdersService = async (orderId, authentication = null) => {
       orderItem.cancelledAt = cancelledAt;
       await itemRepository.save(orderItem);
     }
-    return orderRepository.save(lockedOrder);
+    const cancelledOrder = await orderRepository.save(lockedOrder);
+    await registerAuditLogsService(transactionManager, {
+      authentication,
+      action: "CANCEL",
+      entity: "Order",
+      entityId: cancelledOrder.id,
+      branchId: foundOrder.branch.id,
+      oldData: { status: previousStatus },
+      newData: { status: ORDER_STATUSES.CANCELLED },
+    });
+    return cancelledOrder;
   });
 };
 

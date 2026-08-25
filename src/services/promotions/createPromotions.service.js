@@ -1,9 +1,12 @@
 import { AppDataSource } from "../../data-source.js";
 import { AppError } from "../../errors/appError.js";
+import { USER_ROLES } from "../../constants/user-roles.js";
+import registerAuditLogsService from "../auditLogs/registerAuditLogs.service.js";
 
 const createPromotionsService = async (data, authenticatedUser) => {
-  const promotionRepository = AppDataSource.getRepository("Promotion");
-  const productRepository = AppDataSource.getRepository("Product");
+  return AppDataSource.transaction(async (transactionManager) => {
+  const promotionRepository = transactionManager.getRepository("Promotion");
+  const productRepository = transactionManager.getRepository("Product");
   const foundProduct = await productRepository.findOne({
     where: { id: data.productId },
     relations: { branch: true },
@@ -11,6 +14,12 @@ const createPromotionsService = async (data, authenticatedUser) => {
 
   if (!foundProduct) {
     throw new AppError("Produto não encontrado.", 404);
+  }
+  if (
+    authenticatedUser.role !== USER_ROLES.ADMIN &&
+    authenticatedUser.branch.id !== foundProduct.branch.id
+  ) {
+    throw new AppError("Gerentes só podem criar promoções na própria filial.", 403);
   }
 
   if (data.isActive ?? true) {
@@ -45,7 +54,17 @@ const createPromotionsService = async (data, authenticatedUser) => {
   });
   const savedPromotion = await promotionRepository.save(createdPromotion);
 
+  await registerAuditLogsService(transactionManager, {
+    authentication: { actorId: authenticatedUser.id, actorType: "USER", actor: authenticatedUser },
+    action: "CREATE",
+    entity: "Promotion",
+    entityId: savedPromotion.id,
+    branchId: foundProduct.branch.id,
+    newData: { productId: foundProduct.id, valDiscount, extraPoints: savedPromotion.extraPoints, isActive: savedPromotion.isActive },
+  });
+
   return savedPromotion;
+  });
 };
 
 export default createPromotionsService;

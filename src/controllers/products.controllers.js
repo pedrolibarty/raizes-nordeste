@@ -7,7 +7,7 @@ import updateProductsService from "../services/products/updateProducts.service.j
 
 export const createProductsController = async (req, res) => {
   const data = req.body;
-  const createdProduct = await createProductsService(data);
+  const createdProduct = await createProductsService(data, req.user);
 
   return res.status(201).json({ data: createdProduct });
 };
@@ -35,14 +35,14 @@ export const retrieveProductsController = async (req, res) => {
 export const updateProductsController = async (req, res) => {
   const productId = req.params.id;
   const data = req.body;
-  const updatedProduct = await updateProductsService(productId, data);
+  const updatedProduct = await updateProductsService(productId, data, req.user);
 
   return res.status(200).json({ data: updatedProduct });
 };
 
 export const deleteProductsController = async (req, res) => {
   const productId = req.params.id;
-  await deleteProductsService(productId);
+  await deleteProductsService(productId, req.user);
 
   return res.status(204).send();
 };

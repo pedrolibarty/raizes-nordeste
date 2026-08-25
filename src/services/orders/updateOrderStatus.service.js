@@ -8,6 +8,7 @@ import { AppError } from "../../errors/appError.js";
 import createLoyaltyTransactionsService from "../loyalty/transactions/createLoyaltyTransactions.service.js";
 import createMovementsService from "../movements/createMovements.service.js";
 import retrieveOrderWithItemsService from "./helpers/retrieveOrderWithItems.service.js";
+import registerAuditLogsService from "../auditLogs/registerAuditLogs.service.js";
 
 const hasRole = (authentication, allowedRoles) => {
   return authentication && allowedRoles.includes(authentication.actor.role);
@@ -39,7 +40,7 @@ const updateOrderStatusService = async (
 
     if (
       currentStatus === ORDER_STATUSES.AWAITING_PAYMENT &&
-      [ORDER_STATUSES.PAID, ORDER_STATUSES.PAYMENT_DECLINED].includes(newStatus)
+      newStatus === ORDER_STATUSES.PAID
     ) {
       if (authentication) {
         throw new AppError("A confirmação do pagamento é realizada somente pelo sistema.", 403);
@@ -144,7 +145,17 @@ const updateOrderStatusService = async (
     }
 
     lockedOrder.status = newStatus;
-    return orderRepository.save(lockedOrder);
+    const updatedOrder = await orderRepository.save(lockedOrder);
+    await registerAuditLogsService(transactionManager, {
+      authentication,
+      action: "UPDATE_STATUS",
+      entity: "Order",
+      entityId: updatedOrder.id,
+      branchId: foundOrder.branch.id,
+      oldData: { status: currentStatus },
+      newData: { status: newStatus },
+    });
+    return updatedOrder;
   };
 
   return providedManager

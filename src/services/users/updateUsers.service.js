@@ -14,6 +14,12 @@ const updateUsersService = async (userId, data, authenticatedUser) => {
   if (!foundUser) {
     throw new AppError("Usuário não encontrado.", 404);
   }
+  if (
+    authenticatedUser.role === USER_ROLES.MANAGER &&
+    authenticatedUser.branch.id !== foundUser.branch.id
+  ) {
+    throw new AppError("Gerentes só podem atualizar funcionários da própria filial.", 403);
+  }
 
   const privilegedRoles = [USER_ROLES.ADMIN, USER_ROLES.MANAGER];
 
@@ -40,6 +46,12 @@ const updateUsersService = async (userId, data, authenticatedUser) => {
 
     if (!foundBranch) {
       throw new AppError("A filial informada não foi encontrada.", 404);
+    }
+    if (
+      authenticatedUser.role === USER_ROLES.MANAGER &&
+      authenticatedUser.branch.id !== foundBranch.id
+    ) {
+      throw new AppError("Gerentes não podem mover funcionários para outra filial.", 403);
     }
 
     foundUser.branch = foundBranch;

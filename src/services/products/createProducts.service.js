@@ -1,7 +1,8 @@
 import { AppDataSource } from "../../data-source.js";
 import { AppError } from "../../errors/appError.js";
+import { USER_ROLES } from "../../constants/user-roles.js";
 
-const createProductsService = async (data) => {
+const createProductsService = async (data, authenticatedUser) => {
   return AppDataSource.transaction(async (transactionManager) => {
     const productRepository = transactionManager.getRepository("Product");
     const branchRepository = transactionManager.getRepository("Branch");
@@ -10,6 +11,12 @@ const createProductsService = async (data) => {
 
     if (!foundBranch) {
       throw new AppError("A filial informada não foi encontrada.", 404);
+    }
+    if (
+      authenticatedUser.role !== USER_ROLES.ADMIN &&
+      authenticatedUser.branch.id !== foundBranch.id
+    ) {
+      throw new AppError("Gerentes só podem criar produtos na própria filial.", 403);
     }
 
     const existingProduct = await productRepository.findOne({

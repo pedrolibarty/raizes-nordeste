@@ -43,6 +43,17 @@ const processMockPaymentsService = async (
       );
     }
 
+    const approvedPayment = await paymentRepository.findOne({
+      where: {
+        order: { id: foundOrder.id },
+        status: PAYMENT_STATUSES.APPROVED,
+      },
+    });
+
+    if (approvedPayment) {
+      throw new AppError("Este pedido já possui um pagamento aprovado.", 409);
+    }
+
     const paymentStatusByResult = {
       [PAYMENT_MOCK_RESULTS.APPROVED]: PAYMENT_STATUSES.APPROVED,
       [PAYMENT_MOCK_RESULTS.DECLINED]: PAYMENT_STATUSES.DECLINED,
@@ -83,16 +94,11 @@ const processMockPaymentsService = async (
       );
     }
 
-    if (result === PAYMENT_MOCK_RESULTS.DECLINED) {
-      updatedOrder = await updateOrderStatusService(
-        foundOrder.id,
-        ORDER_STATUSES.PAYMENT_DECLINED,
-        null,
-        transactionManager,
-      );
-    }
-
-    return { payment: savedPayment, order: updatedOrder };
+    return {
+      payment: savedPayment,
+      order: updatedOrder,
+      hasTechnicalError: result === PAYMENT_MOCK_RESULTS.ERROR,
+    };
   });
 };
 

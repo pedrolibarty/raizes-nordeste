@@ -1,9 +1,12 @@
 import { AppDataSource } from "../../data-source.js";
 import { AppError } from "../../errors/appError.js";
+import { USER_ROLES } from "../../constants/user-roles.js";
+import registerAuditLogsService from "../auditLogs/registerAuditLogs.service.js";
 
-const updatePromotionsService = async (promotionId, data) => {
-  const promotionRepository = AppDataSource.getRepository("Promotion");
-  const productRepository = AppDataSource.getRepository("Product");
+const updatePromotionsService = async (promotionId, data, authenticatedUser) => {
+  return AppDataSource.transaction(async (transactionManager) => {
+  const promotionRepository = transactionManager.getRepository("Promotion");
+  const productRepository = transactionManager.getRepository("Product");
   const foundPromotion = await promotionRepository.findOne({
     where: { id: promotionId },
     relations: { product: { branch: true }, user: true },
@@ -12,6 +15,18 @@ const updatePromotionsService = async (promotionId, data) => {
   if (!foundPromotion) {
     throw new AppError("Promoção não encontrada.", 404);
   }
+  if (
+    authenticatedUser.role !== USER_ROLES.ADMIN &&
+    authenticatedUser.branch.id !== foundPromotion.product.branch.id
+  ) {
+    throw new AppError("Gerentes só podem atualizar promoções da própria filial.", 403);
+  }
+  const oldData = {
+    productId: foundPromotion.product.id,
+    valDiscount: foundPromotion.valDiscount,
+    extraPoints: foundPromotion.extraPoints,
+    isActive: foundPromotion.isActive,
+  };
 
   let promotionProduct = foundPromotion.product;
 
@@ -23,6 +38,12 @@ const updatePromotionsService = async (promotionId, data) => {
 
     if (!promotionProduct) {
       throw new AppError("Produto não encontrado.", 404);
+    }
+    if (
+      authenticatedUser.role !== USER_ROLES.ADMIN &&
+      authenticatedUser.branch.id !== promotionProduct.branch.id
+    ) {
+      throw new AppError("Gerentes não podem vincular promoções a outra filial.", 403);
     }
   }
 
@@ -55,7 +76,18 @@ const updatePromotionsService = async (promotionId, data) => {
   promotionRepository.merge(foundPromotion, updatedData);
   const updatedPromotion = await promotionRepository.save(foundPromotion);
 
+  await registerAuditLogsService(transactionManager, {
+    authentication: { actorId: authenticatedUser.id, actorType: "USER", actor: authenticatedUser },
+    action: "UPDATE",
+    entity: "Promotion",
+    entityId: updatedPromotion.id,
+    branchId: promotionProduct.branch.id,
+    oldData,
+    newData: { productId: promotionProduct.id, valDiscount: updatedPromotion.valDiscount, extraPoints: updatedPromotion.extraPoints, isActive: updatedPromotion.isActive },
+  });
+
   return updatedPromotion;
+  });
 };
 
 export default updatePromotionsService;
