@@ -18,6 +18,21 @@ export const initializeTestDatabase = async () => {
   return AppDataSource;
 };
 
+export const cleanTestDatabase = async () => {
+  assertTestDatabase();
+  if (!AppDataSource.isInitialized) {
+    throw new Error("O banco de testes deve ser inicializado antes da limpeza.");
+  }
+  const tableNames = AppDataSource.entityMetadatas.map(
+    (entityMetadata) => `"${entityMetadata.tableName}"`,
+  );
+  if (tableNames.length) {
+    await AppDataSource.query(
+      `TRUNCATE TABLE ${tableNames.join(", ")} RESTART IDENTITY CASCADE`,
+    );
+  }
+};
+
 export const closeTestDatabase = async () => {
   if (AppDataSource.isInitialized) await AppDataSource.destroy();
 };

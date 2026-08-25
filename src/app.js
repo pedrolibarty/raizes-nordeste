@@ -28,6 +28,9 @@ app.get("/health", (request, response) => {
 });
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecification));
+app.get("/api-docs.json", (request, response) => {
+  return response.status(200).json(swaggerSpecification);
+});
 app.use("/audit-logs", auditLogRoutes);
 
 app.use("/branches", branchRoutes);
