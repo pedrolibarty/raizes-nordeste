@@ -5,7 +5,11 @@ import {
 } from "../../constants/movement-types.js";
 import { AppError } from "../../errors/appError.js";
 
-const createMovementsService = async (data, authenticatedUser = null) => {
+const createMovementsService = async (
+  data,
+  authenticatedUser = null,
+  providedManager = null,
+) => {
   if (!MOVEMENT_TYPE_VALUES.includes(data.movementType)) {
     throw new AppError("Tipo de movimentação inválido.", 422);
   }
@@ -18,7 +22,7 @@ const createMovementsService = async (data, authenticatedUser = null) => {
     throw new AppError("Observação da movimentação é obrigatória.", 422);
   }
 
-  return AppDataSource.transaction(async (transactionManager) => {
+  const execute = async (transactionManager) => {
     const inventoryRepository = transactionManager.getRepository("Inventory");
     const movementRepository = transactionManager.getRepository("Movement");
     const foundInventory = await inventoryRepository.findOne({
@@ -58,7 +62,11 @@ const createMovementsService = async (data, authenticatedUser = null) => {
       ...savedMovement,
       stockQuantity: updatedQuantity,
     };
-  });
+  };
+
+  return providedManager
+    ? execute(providedManager)
+    : AppDataSource.transaction(execute);
 };
 
 export default createMovementsService;

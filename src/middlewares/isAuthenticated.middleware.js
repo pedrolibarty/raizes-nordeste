@@ -61,7 +61,10 @@ const isAuthenticatedMiddleware = async (req, res, next) => {
 
   if (actorType === AUTH_ACTOR_TYPES.USER || actorType === undefined) {
     const userRepository = AppDataSource.getRepository("User");
-    const foundUser = await userRepository.findOneBy({ id: actorId });
+    const foundUser = await userRepository.findOne({
+      where: { id: actorId },
+      relations: { branch: true },
+    });
 
     if (!foundUser) {
       throw new AppError("O usuário autenticado não foi encontrado.", 401);
